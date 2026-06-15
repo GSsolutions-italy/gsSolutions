@@ -806,7 +806,7 @@
     submitBtn.disabled = true;
     submitBtn.textContent = 'Invio in corso…';
     try {
-      const res = await fetch('https://formsubmit.co/ajax/info@gssolution.it', {
+const res = await fetch('https://formsubmit.co/ajax/0760619f15b93ab0d1d401158966cbae', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
         body: JSON.stringify(Object.fromEntries(new FormData(contactForm)))
