@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pagina non trovata – GsSolution</title>
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" sizes="32x32" href="favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy:   #0D2244;
+    --navy2:  #122952;
+    --blue:   #1B4282;
+    --orange: #F47B20;
+    --orange2:#E56B10;
+    --white:  #FFFFFF;
+    --light:  #F5F8FF;
+    --muted:  #6B7FA3;
+    --border: rgba(27,66,130,0.15);
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: linear-gradient(135deg, var(--navy) 0%, var(--navy2) 55%, #1B4282 100%);
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 2rem; position: relative; overflow: hidden;
+  }
+
+  /* background dots */
+  body::before {
+    content: ''; position: absolute; inset: 0; opacity: .12;
+    background-image: radial-gradient(circle, rgba(255,255,255,0.6) 1px, transparent 1px);
+    background-size: 40px 40px; pointer-events: none;
+  }
+
+  .card {
+    position: relative; background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 24px; padding: 3.5rem 3rem;
+    max-width: 520px; width: 100%; text-align: center;
+    backdrop-filter: blur(8px);
+  }
+
+  .logo-wrap { margin-bottom: 2.5rem; }
+  .logo-wrap img { height: 80px; filter: brightness(0) invert(1); }
+
+  .err-code {
+    font-family: 'Poppins', sans-serif;
+    font-size: clamp(5rem, 18vw, 8rem);
+    font-weight: 800; line-height: 1;
+    color: transparent;
+    background: linear-gradient(135deg, var(--orange), #ffb347);
+    -webkit-background-clip: text; background-clip: text;
+    margin-bottom: .5rem;
+    filter: drop-shadow(0 4px 24px rgba(244,123,32,0.4));
+  }
+
+  h1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 1.5rem; font-weight: 800;
+    color: var(--white); margin-bottom: .75rem;
+  }
+
+  p {
+    font-size: .95rem; color: rgba(255,255,255,0.6);
+    line-height: 1.75; margin-bottom: 2.2rem;
+  }
+
+  .actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+  .btn-home {
+    background: var(--orange); color: var(--white);
+    padding: .8rem 1.8rem; border-radius: 9px;
+    font-weight: 700; font-size: .92rem; text-decoration: none;
+    box-shadow: 0 4px 20px rgba(244,123,32,0.4);
+    transition: background .2s, transform .2s;
+  }
+  .btn-home:hover { background: var(--orange2); transform: translateY(-2px); }
+
+  .btn-contact {
+    border: 1.5px solid rgba(255,255,255,0.25); color: rgba(255,255,255,0.85);
+    padding: .78rem 1.6rem; border-radius: 9px;
+    font-weight: 600; font-size: .92rem; text-decoration: none;
+    transition: border-color .2s, background .2s;
+  }
+  .btn-contact:hover { border-color: rgba(255,255,255,0.5); background: rgba(255,255,255,0.06); }
+
+  .divider {
+    height: 1px; background: rgba(255,255,255,0.08);
+    margin: 2.2rem 0;
+  }
+
+  .quick-links { display: flex; gap: 1.5rem; justify-content: center; flex-wrap: wrap; }
+  .quick-links a {
+    font-size: .82rem; color: rgba(255,255,255,0.45);
+    text-decoration: none; transition: color .2s;
+  }
+  .quick-links a:hover { color: var(--orange); }
+
+  /* ms dots deco */
+  .ms-deco {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 3px;
+    width: 28px; height: 28px; margin: 0 auto 1.5rem;
+  }
+  .ms-deco span { border-radius: 2px; }
+  .r1{background:#F25022;} .r2{background:#7FBA00;} .r3{background:#00A4EF;} .r4{background:#FFB900;}
+</style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo-wrap">
+      <img src="logo.png" alt="GsSolution">
+    </div>
+    <div class="ms-deco">
+      <span class="r1"></span><span class="r2"></span>
+      <span class="r3"></span><span class="r4"></span>
+    </div>
+    <div class="err-code">404</div>
+    <h1>Pagina non trovata</h1>
+    <p>La pagina che stai cercando non esiste o è stata spostata.<br>Torna alla home e trova quello che ti serve.</p>
+    <div class="actions">
+      <a href="/" class="btn-home">← Torna alla Home</a>
+      <a href="/#contatti" class="btn-contact">Contattaci</a>
+    </div>
+    <div class="divider"></div>
+    <div class="quick-links">
+      <a href="/#servizi">Servizi</a>
+      <a href="/#pacchetti">Pacchetti</a>
+      <a href="/#agente">Il Tuo Agente</a>
+      <a href="/#contatti">Contatti</a>
+    </div>
+  </div>
+</body>
+</html>
