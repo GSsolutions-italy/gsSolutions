@@ -1,0 +1,4 @@
+Claude, prendi questo script per il banner dei cookie che ti incollo qui sotto:
+<script id="Cookiebot" src="https://consent.cookiebot.com/uc.js" data-cbid="38ab03ad-1e87-45d8-9531-3301e4a7ac08" data-blockingmode="auto" type="text/javascript"></script>
+
+Inseriscilo correttamente nel tag <head> della mia homepage (index(13).html) e in tutte le altre pagine del sito, posizionandolo come primo elemento per farlo caricare subito a norma di legge.
