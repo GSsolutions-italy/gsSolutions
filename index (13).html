@@ -717,12 +717,56 @@
   }
   .prenota-frame-wrap iframe { width: 100%; height: 100%; border: 0; display: block; }
 
-  /* PRIVACY POLICY */
-  #privacy { background: var(--white); padding-top: 4rem; padding-bottom: 4rem; }
-  .privacy-inner { max-width: 760px; }
+  /* PRIVACY / COOKIE CONSENT MODAL */
+  .privacy-modal-overlay {
+    position: fixed; inset: 0; background: rgba(13,34,68,0.6);
+    display: none; align-items: center; justify-content: center;
+    z-index: 9997; padding: 5vw;
+  }
+  .privacy-modal-overlay.open { display: flex; }
+  .privacy-modal {
+    background: var(--white); border-radius: 18px; max-width: 720px; width: 100%;
+    max-height: 85vh; overflow-y: auto; box-shadow: 0 24px 64px rgba(13,34,68,0.35);
+    animation: svcModalIn .22s ease;
+  }
+  .privacy-modal-head {
+    display: flex; align-items: center; gap: 1rem; padding: 1.6rem 1.8rem;
+    border-bottom: 1.5px solid var(--border); position: sticky; top: 0; background: var(--white);
+    border-radius: 18px 18px 0 0;
+  }
+  .privacy-modal-head h3 { font-family: 'Poppins', sans-serif; font-size: 1.25rem; font-weight: 700; color: var(--navy); }
+  .privacy-modal-close {
+    margin-left: auto; width: 36px; height: 36px; border-radius: 10px; border: none;
+    background: var(--light); color: var(--navy); font-size: 1.1rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: background .2s;
+    flex-shrink: 0;
+  }
+  .privacy-modal-close:hover { background: var(--border); }
+  .privacy-modal-close:focus-visible { outline: 3px solid var(--orange); outline-offset: 2px; }
+  .privacy-modal-body { padding: 1.4rem 1.8rem 0; }
   .privacy-block { margin-top: 1.6rem; }
+  .privacy-block:first-child { margin-top: 0; }
   .privacy-block h4 { font-family: 'Poppins', sans-serif; font-size: 1rem; color: var(--navy); margin-bottom: .4rem; }
   .privacy-block p { font-size: .88rem; color: var(--muted); line-height: 1.7; }
+  .privacy-modal-footer {
+    padding: 1.4rem 1.8rem 1.8rem; position: sticky; bottom: 0; background: var(--white);
+    display: flex; gap: .75rem; flex-wrap: wrap;
+  }
+  .privacy-modal-btn {
+    flex: 1; min-width: 160px; text-align: center; border: none; border-radius: 10px;
+    padding: .85rem 1.2rem; font-family: 'Inter', sans-serif; font-size: .88rem; font-weight: 700;
+    cursor: pointer; transition: background .2s;
+  }
+  .privacy-modal-btn.secondary { background: var(--light); color: var(--navy); border: 1.5px solid var(--border); }
+  .privacy-modal-btn.secondary:hover { background: var(--border); }
+  .privacy-modal-btn.primary { background: var(--orange); color: var(--white); }
+  .privacy-modal-btn.primary:hover { background: var(--orange2); }
+  @media (max-width: 600px) {
+    .privacy-modal { max-height: 90vh; }
+    .privacy-modal-head { padding: 1.3rem 1.3rem; }
+    .privacy-modal-body { padding: 1.3rem 1.3rem 0; }
+    .privacy-modal-footer { padding: 1.2rem 1.3rem 1.5rem; flex-direction: column; }
+  }
 
   .contatti-inner { display: grid; grid-template-columns: 1fr 1fr; gap: 5rem; align-items: start; }
   .contact-info h3 { font-family: 'Poppins', sans-serif; font-size: 1.6rem; font-weight: 800; color: var(--navy); margin-bottom: .8rem; }
@@ -772,8 +816,10 @@
     transition: background .2s; box-shadow: 0 4px 16px rgba(244,123,32,0.3);
   }
   .btn-submit:hover { background: var(--orange2); }
-  .privacy-note { font-size: .73rem; color: var(--muted); line-height: 1.6; text-align: center; }
-  .privacy-note a { color: var(--orange); }
+  .consent { display: flex; align-items: flex-start; gap: .6rem; font-size: .78rem; color: var(--muted); line-height: 1.55; cursor: pointer; }
+  .consent input[type="checkbox"] { width: 17px; height: 17px; min-width: 17px; margin-top: 2px; accent-color: var(--orange); cursor: pointer; }
+  .consent a { color: var(--orange); }
+  .consent.field-error span { color: #DC2626; }
   input.field-error, textarea.field-error { border-color: #DC2626; background: rgba(220,38,38,0.04); }
   .form-error {
     font-size: .8rem; color: #DC2626; font-weight: 600;
@@ -861,6 +907,7 @@
   setTimeout(function(){
     splash.style.display = 'none';
     document.body.style.overflow = '';
+    if (typeof maybeShowPrivacyModal === 'function') maybeShowPrivacyModal();
   }, 3050);
 })();
 </script>
@@ -1475,6 +1522,7 @@
       </div>
       <input type="email" id="formEmail" placeholder="Email aziendale *" data-i18n-placeholder="contatti.form.email" required>
       <input type="text" id="formAzienda" placeholder="Azienda" data-i18n-placeholder="contatti.form.azienda">
+      <input type="tel" id="formTelefono" placeholder="Numero di telefono" data-i18n-placeholder="contatti.form.telefono">
       <div class="frow-2">
         <select id="formPaese">
           <option value="" disabled selected data-i18n="contatti.form.paese.placeholder">Paese</option>
@@ -1501,25 +1549,40 @@
         <option data-i18n="contatti.form.opt7">Altro</option>
       </select>
       <textarea id="formMessaggio" placeholder="Descrivi brevemente la tua situazione e cosa ti serve..." data-i18n-placeholder="contatti.form.messaggio"></textarea>
+      <label class="consent" id="consentLabel">
+        <input type="checkbox" id="formPrivacyConsent" required>
+        <span data-i18n-html="contatti.form.consent">Ho letto e accetto la <a href="#privacy">Privacy Policy</a> e la <a href="#privacy">Cookie Policy</a>. I tuoi dati non verranno mai ceduti a terzi. *</span>
+      </label>
       <p class="form-error" id="formError" style="display:none;" role="alert" aria-live="assertive"></p>
       <button class="btn-submit" id="submitBtn" aria-live="polite" data-i18n="js.formSubmit">Invia Richiesta →</button>
-      <p class="privacy-note" data-i18n-html="contatti.form.privacynote">Inviando accetti la nostra <a href="#privacy">Privacy Policy</a>. I tuoi dati non verranno mai ceduti a terzi.</p>
     </div>
   </div>
 </section>
 
-<!-- PRIVACY POLICY -->
-<section id="privacy">
-  <div class="privacy-inner">
-    <div class="section-tag" data-i18n="privacy.tag">Privacy Policy</div>
-    <h2 data-i18n="privacy.h2">Informativa sulla Privacy</h2>
-    <p class="section-sub" data-i18n="privacy.sub">Informativa ai sensi dell'art. 13 GDPR (Reg. UE 2016/679). Aggiornata a giugno 2026.</p>
-    <div class="privacy-block">
-      <h4 data-i18n="privacy.b1.title">📋 Informativa completa</h4>
-      <p data-i18n-html="privacy.b1.text" style="white-space:pre-line;line-height:1.8;"></p>
+<!-- PRIVACY / COOKIE CONSENT MODAL -->
+<div class="privacy-modal-overlay" id="privacyModalOverlay" role="dialog" aria-modal="true" aria-labelledby="privacyModalTitle">
+  <div class="privacy-modal">
+    <div class="privacy-modal-head">
+      <h3 id="privacyModalTitle" data-i18n="privacy.h2">Informativa sulla Privacy</h3>
+      <button type="button" class="privacy-modal-close" aria-label="Chiudi" data-i18n-aria="modal.close" onclick="closePrivacyModal()">✕</button>
+    </div>
+    <div class="privacy-modal-body">
+      <p class="section-sub" data-i18n="privacy.sub">Informativa ai sensi dell'art. 13 GDPR (Reg. UE 2016/679). Aggiornata a giugno 2026.</p>
+      <div class="privacy-block">
+        <h4 data-i18n="privacy.b1.title">📋 Informativa completa</h4>
+        <p data-i18n-html="privacy.b1.text" style="white-space:pre-line;line-height:1.8;"></p>
+      </div>
+      <div class="privacy-block">
+        <h4 data-i18n="privacy.b2.title">🍪 Cookie Policy</h4>
+        <p data-i18n-html="privacy.b2.text" style="white-space:pre-line;line-height:1.8;"></p>
+      </div>
+    </div>
+    <div class="privacy-modal-footer">
+      <button type="button" class="privacy-modal-btn secondary" data-i18n="privacy.necessary" onclick="closePrivacyModal('necessary')">Solo necessari</button>
+      <button type="button" class="privacy-modal-btn primary" data-i18n="privacy.accept" onclick="closePrivacyModal('all')">Accetta tutti</button>
     </div>
   </div>
-</section>
+</div>
 
 <!-- FOOTER -->
 <footer>
@@ -1689,6 +1752,7 @@
     'js.formField.nome': 'nome',
     'js.formField.cognome': 'cognome',
     'js.formField.email': 'email valida',
+    'js.formField.consent': 'consenso privacy',
     'js.formSuccess': '✓ Richiesta inviata!',
     'js.formSubmit': 'Invia Richiesta →',
     'js.contactMsgPackage': 'Pacchetto selezionato',
@@ -1754,6 +1818,7 @@
     'contatti.hours.value': 'Lun–Ven 9:00–18:00 · Emergenze H24',
     'contatti.form.h3': 'Invia una richiesta',
     'contatti.form.sub': 'Risponderemo entro poche ore',
+    'contatti.form.telefono': 'Numero di telefono',
     'contatti.form.nome': 'Nome *',
     'contatti.form.cognome': 'Cognome *',
     'contatti.form.email': 'Email aziendale *',
@@ -1767,18 +1832,15 @@
     'contatti.form.opt6': 'Pacchetto personalizzato',
     'contatti.form.opt7': 'Altro',
     'contatti.form.messaggio': 'Descrivi brevemente la tua situazione e cosa ti serve...',
-    'contatti.form.privacynote': 'Inviando accetti la nostra <a href="#privacy">Privacy Policy</a>. I tuoi dati non verranno mai ceduti a terzi.',
-    'privacy.tag': "Privacy Policy",
+    'contatti.form.consent': 'Ho letto e accetto la <a href="#privacy">Privacy Policy</a> e la <a href="#privacy">Cookie Policy</a>. I tuoi dati non verranno mai ceduti a terzi. *',
     'privacy.h2': "Informativa sulla Privacy",
     'privacy.sub': "Informativa ai sensi dell'art. 13 GDPR (Reg. UE 2016/679). Aggiornata a giugno 2026.",
+    'privacy.necessary': "Solo necessari",
+    'privacy.accept': "Accetta tutti",
     'privacy.b1.title': "📋 Informativa completa",
-    'privacy.b1.text': "GsSolution di Marco Genovesi, con sede in Italia, P.IVA 01360410326, in qualità di Titolare del trattamento, informa gli utenti ai sensi dell'art. 13 del Regolamento UE 2016/679 (GDPR) circa il trattamento dei dati personali raccolti tramite questo sito web.\n\n<strong>1. Titolare del trattamento</strong>\nGsSolution di Marco Genovesi — P.IVA 01360410326 — info@gssolution.it\n\n<strong>2. Dati raccolti e finalità</strong>\nTramite il modulo di contatto raccogliamo: nome, cognome, indirizzo email, nome azienda (facoltativo), paese, lingua preferita e il contenuto del messaggio. I dati vengono trattati esclusivamente per rispondere alla richiesta, predisporre preventivi personalizzati e, in caso di rapporto contrattuale, per la gestione dello stesso. Base giuridica: art. 6 par. 1 lett. b) GDPR (esecuzione di un contratto o misure precontrattuali).\n\n<strong>3. Cookie e dati di navigazione</strong>\nIl sito utilizza cookie tecnici necessari al funzionamento. Possono essere presenti cookie di terze parti (es. Microsoft Bookings per le prenotazioni) soggetti alle rispettive informative. Per dettagli vedere il banner cookie.\n\n<strong>4. Conservazione</strong>\nI dati di contatto sono conservati per il tempo necessario a evadere la richiesta o per la durata del rapporto contrattuale, e comunque non oltre 10 anni dalla cessazione del rapporto per obblighi di legge.\n\n<strong>5. Destinatari</strong>\nI dati non vengono ceduti a terzi. Possono essere comunicati a fornitori tecnici (hosting, email) che agiscono come Responsabili del trattamento ai sensi dell'art. 28 GDPR.\n\n<strong>6. Trasferimenti extra-UE</strong>\nL'utilizzo di servizi Microsoft 365 può comportare trasferimenti di dati negli USA, coperti dalle garanzie del Data Privacy Framework UE-USA.\n\n<strong>7. Diritti dell'interessato</strong>\nL'utente ha il diritto di accedere, rettificare, cancellare, limitare o opporsi al trattamento dei propri dati, nonché il diritto alla portabilità (artt. 15-22 GDPR). Per esercitare i propri diritti: info@gssolution.it. Ha inoltre diritto di proporre reclamo al Garante per la protezione dei dati personali (www.garanteprivacy.it).",
-    'privacy.b2.title': "",
-    'privacy.b2.text': "",
-    'privacy.b3.title': "",
-    'privacy.b3.text': "",
-    'privacy.b4.title': "",
-    'privacy.b4.text': "",
+    'privacy.b1.text': "GsSolution di Marco Genovesi, con sede in Italia, P.IVA 01360410326, in qualità di Titolare del trattamento, informa gli utenti ai sensi dell'art. 13 del Regolamento UE 2016/679 (GDPR) circa il trattamento dei dati personali raccolti tramite questo sito web.\n\n<strong>1. Titolare del trattamento</strong>\nGsSolution di Marco Genovesi — P.IVA 01360410326 — info@gssolution.it\n\n<strong>2. Dati raccolti e finalità</strong>\nTramite il modulo di contatto raccogliamo: nome, cognome, indirizzo email, nome azienda (facoltativo), paese, lingua preferita e il contenuto del messaggio. I dati vengono trattati esclusivamente per rispondere alla richiesta, predisporre preventivi personalizzati e, in caso di rapporto contrattuale, per la gestione dello stesso. Base giuridica: art. 6 par. 1 lett. b) GDPR (esecuzione di un contratto o misure precontrattuali).\n\n<strong>3. Cookie e dati di navigazione</strong>\nIl sito utilizza cookie tecnici necessari al funzionamento. Possono essere presenti cookie di terze parti (es. Microsoft Bookings per le prenotazioni) soggetti alle rispettive informative. Per dettagli vedere la Cookie Policy qui sotto.\n\n<strong>4. Conservazione</strong>\nI dati di contatto sono conservati per il tempo necessario a evadere la richiesta o per la durata del rapporto contrattuale, e comunque non oltre 10 anni dalla cessazione del rapporto per obblighi di legge.\n\n<strong>5. Destinatari</strong>\nI dati non vengono ceduti a terzi. Possono essere comunicati a fornitori tecnici (hosting, email) che agiscono come Responsabili del trattamento ai sensi dell'art. 28 GDPR.\n\n<strong>6. Trasferimenti extra-UE</strong>\nL'utilizzo di servizi Microsoft 365 può comportare trasferimenti di dati negli USA, coperti dalle garanzie del Data Privacy Framework UE-USA.\n\n<strong>7. Diritti dell'interessato</strong>\nL'utente ha il diritto di accedere, rettificare, cancellare, limitare o opporsi al trattamento dei propri dati, nonché il diritto alla portabilità (artt. 15-22 GDPR). Per esercitare i propri diritti: info@gssolution.it. Ha inoltre diritto di proporre reclamo al Garante per la protezione dei dati personali (www.garanteprivacy.it).",
+    'privacy.b2.title': "🍪 Cookie Policy",
+    'privacy.b2.text': "I cookie sono piccoli file di testo che i siti visitati inviano al terminale dell'utente, dove vengono memorizzati per essere poi ritrasmessi agli stessi siti alla visita successiva.\n\n<strong>1. Cookie tecnici</strong>\nQuesto sito utilizza cookie tecnici necessari al corretto funzionamento delle pagine, alla gestione della lingua selezionata e della sessione. Questi cookie non richiedono consenso.\n\n<strong>2. Google Fonts</strong>\nIl sito carica caratteri tipografici dai server di Google Fonts (Google Ireland Limited), che possono comportare la trasmissione dell'indirizzo IP a Google. Per informazioni: policies.google.com/privacy.\n\n<strong>3. Microsoft Bookings</strong>\nLa sezione \"Prenota un appuntamento\" integra un iframe di Microsoft Bookings. Microsoft può installare propri cookie tecnici e statistici secondo la propria informativa: privacy.microsoft.com.\n\n<strong>4. Gestione e disattivazione</strong>\nPuoi gestire le tue preferenze tramite i pulsanti \"Solo necessari\" e \"Accetta tutti\" in questa finestra, oppure disabilitare i cookie direttamente dalle impostazioni del tuo browser.\n\n<strong>5. Titolare del trattamento</strong>\nGsSolution di Marco Genovesi — P.IVA 01360410326 — info@gssolution.it",
     'svc.mailbox.intro': "Una casella email professionale Exchange, pronta in poche ore e gestita interamente da noi: dalla configurazione iniziale alla manutenzione quotidiana.",
     'svc.mailbox.step1.title': "Analisi del fabbisogno",
     'svc.mailbox.step1.text': "Valutiamo quante caselle ti servono, se vuoi un dominio personalizzato o .onmicrosoft.com, e le esigenze di spazio e sicurezza del tuo team.",
@@ -2147,6 +2209,7 @@
     'js.formField.nome': 'first name',
     'js.formField.cognome': 'last name',
     'js.formField.email': 'valid email',
+    'js.formField.consent': 'privacy consent',
     'js.formSuccess': '✓ Request sent!',
     'js.formSubmit': 'Send Request →',
     'js.contactMsgPackage': 'Selected package',
@@ -2212,6 +2275,7 @@
     'contatti.hours.value': 'Mon–Fri 9:00 AM–6:00 PM · Emergencies 24/7',
     'contatti.form.h3': 'Send a request',
     'contatti.form.sub': "We'll reply within a few hours",
+    'contatti.form.telefono': 'Phone number',
     'contatti.form.nome': 'First name *',
     'contatti.form.cognome': 'Last name *',
     'contatti.form.email': 'Business email *',
@@ -2225,18 +2289,15 @@
     'contatti.form.opt6': 'Custom package',
     'contatti.form.opt7': 'Other',
     'contatti.form.messaggio': 'Briefly describe your situation and what you need...',
-    'contatti.form.privacynote': 'By submitting, you accept our <a href="#privacy">Privacy Policy</a>. Your data will never be shared with third parties.',
-    'privacy.tag': "Privacy Policy",
+    'contatti.form.consent': 'By submitting this form, you accept our <a href="#privacy">Privacy Policy</a> and our <a href="#privacy">Cookie Policy</a>. Your data will never be shared with third parties. *',
     'privacy.h2': "Privacy Policy",
     'privacy.sub': "Information pursuant to Art. 13 GDPR (EU Reg. 2016/679). Updated June 2026.",
+    'privacy.necessary': "Necessary only",
+    'privacy.accept': "Accept all",
     'privacy.b1.title': "📋 Full privacy policy",
-    'privacy.b1.text': "GsSolution, operated by Marco Genovesi, based in Italy, VAT 01360410326, acting as Data Controller, informs users pursuant to Art. 13 of EU Regulation 2016/679 (GDPR) about the processing of personal data collected through this website.\n\n<strong>1. Data Controller</strong>\nGsSolution — Marco Genovesi — VAT 01360410326 — info@gssolution.it\n\n<strong>2. Data collected and purposes</strong>\nThrough the contact form we collect: first name, last name, email address, company name (optional), country, preferred language and message content. Data is processed exclusively to respond to requests, prepare personalized quotes and, if a contractual relationship arises, to manage it. Legal basis: Art. 6(1)(b) GDPR (performance of a contract or pre-contractual measures).\n\n<strong>3. Cookies and browsing data</strong>\nThis site uses technical cookies necessary for operation. Third-party cookies may be present (e.g. Microsoft Bookings for appointments), subject to their respective privacy policies. See the cookie banner for details.\n\n<strong>4. Retention</strong>\nContact data is retained for the time necessary to handle the request or for the duration of the contractual relationship, and in any case no longer than 10 years after the end of the relationship for legal obligations.\n\n<strong>5. Recipients</strong>\nData is not shared with third parties. It may be communicated to technical providers (hosting, email) acting as Data Processors under Art. 28 GDPR.\n\n<strong>6. International transfers</strong>\nUse of Microsoft 365 services may involve data transfers to the USA, covered by the EU-US Data Privacy Framework.\n\n<strong>7. Your rights</strong>\nYou have the right to access, rectify, erase, restrict or object to the processing of your data, as well as the right to data portability (Arts. 15-22 GDPR). To exercise your rights: info@gssolution.it. You also have the right to lodge a complaint with your national data protection authority.",
-    'privacy.b2.title': "",
-    'privacy.b2.text': "",
-    'privacy.b3.title': "",
-    'privacy.b3.text': "",
-    'privacy.b4.title': "",
-    'privacy.b4.text': "",
+    'privacy.b1.text': "GsSolution, operated by Marco Genovesi, based in Italy, VAT 01360410326, acting as Data Controller, informs users pursuant to Art. 13 of EU Regulation 2016/679 (GDPR) about the processing of personal data collected through this website.\n\n<strong>1. Data Controller</strong>\nGsSolution — Marco Genovesi — VAT 01360410326 — info@gssolution.it\n\n<strong>2. Data collected and purposes</strong>\nThrough the contact form we collect: first name, last name, email address, company name (optional), country, preferred language and message content. Data is processed exclusively to respond to requests, prepare personalized quotes and, if a contractual relationship arises, to manage it. Legal basis: Art. 6(1)(b) GDPR (performance of a contract or pre-contractual measures).\n\n<strong>3. Cookies and browsing data</strong>\nThis site uses technical cookies necessary for operation. Third-party cookies may be present (e.g. Microsoft Bookings for appointments), subject to their respective privacy policies. See the Cookie Policy below for details.\n\n<strong>4. Retention</strong>\nContact data is retained for the time necessary to handle the request or for the duration of the contractual relationship, and in any case no longer than 10 years after the end of the relationship for legal obligations.\n\n<strong>5. Recipients</strong>\nData is not shared with third parties. It may be communicated to technical providers (hosting, email) acting as Data Processors under Art. 28 GDPR.\n\n<strong>6. International transfers</strong>\nUse of Microsoft 365 services may involve data transfers to the USA, covered by the EU-US Data Privacy Framework.\n\n<strong>7. Your rights</strong>\nYou have the right to access, rectify, erase, restrict or object to the processing of your data, as well as the right to data portability (Arts. 15-22 GDPR). To exercise your rights: info@gssolution.it. You also have the right to lodge a complaint with your national data protection authority.",
+    'privacy.b2.title': "🍪 Cookie Policy",
+    'privacy.b2.text': "Cookies are small text files that visited websites send to the user's device, where they are stored before being sent back to the same websites on the next visit.\n\n<strong>1. Technical cookies</strong>\nThis site uses technical cookies necessary for the correct functioning of the pages, for managing the selected language and the session. These cookies do not require consent.\n\n<strong>2. Google Fonts</strong>\nThe site loads typefaces from Google Fonts servers (Google Ireland Limited), which may involve transmitting your IP address to Google. For more information: policies.google.com/privacy.\n\n<strong>3. Microsoft Bookings</strong>\nThe \"Book an appointment\" section embeds a Microsoft Bookings iframe. Microsoft may set its own technical and statistical cookies according to its own policy: privacy.microsoft.com.\n\n<strong>4. Managing and disabling cookies</strong>\nYou can manage your preferences using the \"Necessary only\" and \"Accept all\" buttons in this window, or disable cookies directly from your browser settings.\n\n<strong>5. Data Controller</strong>\nGsSolution — Marco Genovesi — VAT 01360410326 — info@gssolution.it",
     'svc.mailbox.intro': "A professional Exchange email account, ready in a few hours and fully managed by us: from initial setup to daily maintenance.",
     'svc.mailbox.step1.title': "Needs assessment",
     'svc.mailbox.step1.text': "We assess how many mailboxes you need, whether you want a custom domain or .onmicrosoft.com, and your team's storage and security requirements.",
@@ -2605,6 +2666,7 @@
     'js.formField.nome': 'prénom',
     'js.formField.cognome': 'nom',
     'js.formField.email': 'email valide',
+    'js.formField.consent': 'consentement RGPD',
     'js.formSuccess': '✓ Demande envoyée !',
     'js.formSubmit': 'Envoyer la Demande →',
     'js.contactMsgPackage': 'Forfait sélectionné',
@@ -2670,6 +2732,7 @@
     'contatti.hours.value': 'Lun–Ven 9h–18h · Urgences 24h/24',
     'contatti.form.h3': 'Envoyer une demande',
     'contatti.form.sub': 'Nous répondrons sous quelques heures',
+    'contatti.form.telefono': 'Numéro de téléphone',
     'contatti.form.nome': 'Prénom *',
     'contatti.form.cognome': 'Nom *',
     'contatti.form.email': 'Email professionnel *',
@@ -2683,18 +2746,15 @@
     'contatti.form.opt6': 'Forfait personnalisé',
     'contatti.form.opt7': 'Autre',
     'contatti.form.messaggio': 'Décrivez brièvement votre situation et ce dont vous avez besoin...',
-    'contatti.form.privacynote': 'En envoyant, vous acceptez notre <a href="#privacy">Politique de Confidentialité</a>. Vos données ne seront jamais cédées à des tiers.',
-    'privacy.tag': "Politique de Confidentialité",
+    'contatti.form.consent': 'En envoyant ce formulaire, vous acceptez notre <a href="#privacy">Politique de Confidentialité</a> et notre <a href="#privacy">Politique de Cookies</a>. Vos données ne seront jamais cédées à des tiers. *',
     'privacy.h2': "Politique de Confidentialité",
     'privacy.sub': "Information conformément à l'art. 13 RGPD (Règl. UE 2016/679). Mise à jour en juin 2026.",
+    'privacy.necessary': "Nécessaires seulement",
+    'privacy.accept': "Tout accepter",
     'privacy.b1.title': "📋 Politique complète",
-    'privacy.b1.text': "GsSolution, exploitée par Marco Genovesi, basée en Italie, TVA 01360410326, en qualité de Responsable du traitement, informe les utilisateurs conformément à l'art. 13 du Règlement UE 2016/679 (RGPD) concernant le traitement des données personnelles collectées via ce site web.\n\n<strong>1. Responsable du traitement</strong>\nGsSolution — Marco Genovesi — TVA 01360410326 — info@gssolution.it\n\n<strong>2. Données collectées et finalités</strong>\nVia le formulaire de contact, nous collectons : prénom, nom, adresse email, nom d'entreprise (facultatif), pays, langue préférée et contenu du message. Les données sont traitées exclusivement pour répondre aux demandes, préparer des devis personnalisés et, en cas de relation contractuelle, pour la gérer. Base juridique : art. 6 par. 1 let. b) RGPD (exécution d'un contrat ou mesures précontractuelles).\n\n<strong>3. Cookies et données de navigation</strong>\nCe site utilise des cookies techniques nécessaires au fonctionnement. Des cookies tiers peuvent être présents (ex. Microsoft Bookings pour les rendez-vous), soumis à leurs politiques de confidentialité respectives. Voir le bandeau cookie pour les détails.\n\n<strong>4. Conservation</strong>\nLes données de contact sont conservées le temps nécessaire pour traiter la demande ou pendant la durée de la relation contractuelle, et en tout cas pas plus de 10 ans après la fin de la relation pour les obligations légales.\n\n<strong>5. Destinataires</strong>\nLes données ne sont pas cédées à des tiers. Elles peuvent être communiquées à des prestataires techniques (hébergement, email) agissant en tant que Sous-traitants au sens de l'art. 28 RGPD.\n\n<strong>6. Transferts internationaux</strong>\nL'utilisation des services Microsoft 365 peut impliquer des transferts de données vers les États-Unis, couverts par le Cadre de protection des données UE-États-Unis.\n\n<strong>7. Vos droits</strong>\nVous avez le droit d'accéder, rectifier, effacer, limiter ou vous opposer au traitement de vos données, ainsi que le droit à la portabilité des données (arts. 15-22 RGPD). Pour exercer vos droits : info@gssolution.it. Vous avez également le droit d'introduire une réclamation auprès de votre autorité nationale de protection des données.",
-    'privacy.b2.title': "",
-    'privacy.b2.text': "",
-    'privacy.b3.title': "",
-    'privacy.b3.text': "",
-    'privacy.b4.title': "",
-    'privacy.b4.text': "",
+    'privacy.b1.text': "GsSolution, exploitée par Marco Genovesi, basée en Italie, TVA 01360410326, en qualité de Responsable du traitement, informe les utilisateurs conformément à l'art. 13 du Règlement UE 2016/679 (RGPD) concernant le traitement des données personnelles collectées via ce site web.\n\n<strong>1. Responsable du traitement</strong>\nGsSolution — Marco Genovesi — TVA 01360410326 — info@gssolution.it\n\n<strong>2. Données collectées et finalités</strong>\nVia le formulaire de contact, nous collectons : prénom, nom, adresse email, nom d'entreprise (facultatif), pays, langue préférée et contenu du message. Les données sont traitées exclusivement pour répondre aux demandes, préparer des devis personnalisés et, en cas de relation contractuelle, pour la gérer. Base juridique : art. 6 par. 1 let. b) RGPD (exécution d'un contrat ou mesures précontractuelles).\n\n<strong>3. Cookies et données de navigation</strong>\nCe site utilise des cookies techniques nécessaires au fonctionnement. Des cookies tiers peuvent être présents (ex. Microsoft Bookings pour les rendez-vous), soumis à leurs politiques de confidentialité respectives. Voir la Politique de Cookies ci-dessous pour les détails.\n\n<strong>4. Conservation</strong>\nLes données de contact sont conservées le temps nécessaire pour traiter la demande ou pendant la durée de la relation contractuelle, et en tout cas pas plus de 10 ans après la fin de la relation pour les obligations légales.\n\n<strong>5. Destinataires</strong>\nLes données ne sont pas cédées à des tiers. Elles peuvent être communiquées à des prestataires techniques (hébergement, email) agissant en tant que Sous-traitants au sens de l'art. 28 RGPD.\n\n<strong>6. Transferts internationaux</strong>\nL'utilisation des services Microsoft 365 peut impliquer des transferts de données vers les États-Unis, couverts par le Cadre de protection des données UE-États-Unis.\n\n<strong>7. Vos droits</strong>\nVous avez le droit d'accéder, rectifier, effacer, limiter ou vous opposer au traitement de vos données, ainsi que le droit à la portabilité des données (arts. 15-22 RGPD). Pour exercer vos droits : info@gssolution.it. Vous avez également le droit d'introduire une réclamation auprès de votre autorité nationale de protection des données.",
+    'privacy.b2.title': "🍪 Politique des cookies",
+    'privacy.b2.text': "Les cookies sont de petits fichiers texte que les sites visités envoient au terminal de l'utilisateur, où ils sont stockés avant d'être retransmis aux mêmes sites lors de la visite suivante.\n\n<strong>1. Cookies techniques</strong>\nCe site utilise des cookies techniques nécessaires au bon fonctionnement des pages, à la gestion de la langue sélectionnée et de la session. Ces cookies ne nécessitent pas de consentement.\n\n<strong>2. Google Fonts</strong>\nLe site charge des polices depuis les serveurs de Google Fonts (Google Ireland Limited), ce qui peut entraîner la transmission de votre adresse IP à Google. Pour plus d'informations : policies.google.com/privacy.\n\n<strong>3. Microsoft Bookings</strong>\nLa section \"Prendre rendez-vous\" intègre un iframe Microsoft Bookings. Microsoft peut installer ses propres cookies techniques et statistiques selon sa politique : privacy.microsoft.com.\n\n<strong>4. Gestion et désactivation</strong>\nVous pouvez gérer vos préférences via les boutons \"Nécessaires seulement\" et \"Tout accepter\" présents dans cette fenêtre, ou désactiver les cookies directement depuis les paramètres de votre navigateur.\n\n<strong>5. Responsable du traitement</strong>\nGsSolution — Marco Genovesi — TVA 01360410326 — info@gssolution.it",
     'svc.mailbox.intro': "Une boîte mail Exchange professionnelle, prête en quelques heures et entièrement gérée par nous : de la configuration initiale à la maintenance quotidienne.",
     'svc.mailbox.step1.title': "Analyse des besoins",
     'svc.mailbox.step1.text': "Nous évaluons combien de boîtes mail il vous faut, si vous souhaitez un domaine personnalisé ou .onmicrosoft.com, ainsi que les besoins d'espace et de sécurité de votre équipe.",
@@ -3063,6 +3123,7 @@
     'js.formField.nome': 'Vorname',
     'js.formField.cognome': 'Nachname',
     'js.formField.email': 'gültige E-Mail',
+    'js.formField.consent': 'Datenschutz-Zustimmung',
     'js.formSuccess': '✓ Anfrage gesendet!',
     'js.formSubmit': 'Anfrage Senden →',
     'js.contactMsgPackage': 'Ausgewähltes Paket',
@@ -3128,6 +3189,7 @@
     'contatti.hours.value': 'Mo–Fr 9:00–18:00 Uhr · Notfälle rund um die Uhr',
     'contatti.form.h3': 'Anfrage senden',
     'contatti.form.sub': 'Wir antworten innerhalb weniger Stunden',
+    'contatti.form.telefono': 'Telefonnummer',
     'contatti.form.nome': 'Vorname *',
     'contatti.form.cognome': 'Nachname *',
     'contatti.form.email': 'Geschäftliche E-Mail *',
@@ -3141,18 +3203,15 @@
     'contatti.form.opt6': 'Individuelles Paket',
     'contatti.form.opt7': 'Sonstiges',
     'contatti.form.messaggio': 'Beschreiben Sie kurz Ihre Situation und was Sie benötigen...',
-    'contatti.form.privacynote': 'Mit dem Absenden akzeptieren Sie unsere <a href="#privacy">Datenschutzrichtlinie</a>. Ihre Daten werden niemals an Dritte weitergegeben.',
-    'privacy.tag': "Datenschutzrichtlinie",
+    'contatti.form.consent': 'Mit dem Absenden akzeptieren Sie unsere <a href="#privacy">Datenschutzrichtlinie</a> und unsere <a href="#privacy">Cookie-Richtlinie</a>. Ihre Daten werden niemals an Dritte weitergegeben. *',
     'privacy.h2': "Datenschutzerklärung",
     'privacy.sub': "Information gemäß Art. 13 DSGVO (EU-Verordnung 2016/679). Aktualisiert Juni 2026.",
+    'privacy.necessary': "Nur notwendige",
+    'privacy.accept': "Alle akzeptieren",
     'privacy.b1.title': "📋 Vollständige Datenschutzerklärung",
-    'privacy.b1.text': "GsSolution, betrieben von Marco Genovesi, mit Sitz in Italien, USt-IdNr. 01360410326, als Verantwortlicher für die Datenverarbeitung, informiert die Nutzer gemäß Art. 13 der EU-Verordnung 2016/679 (DSGVO) über die Verarbeitung personenbezogener Daten, die über diese Website erhoben werden.\n\n<strong>1. Verantwortlicher</strong>\nGsSolution — Marco Genovesi — USt-IdNr. 01360410326 — info@gssolution.it\n\n<strong>2. Erhobene Daten und Zwecke</strong>\nÜber das Kontaktformular erheben wir: Vorname, Nachname, E-Mail-Adresse, Firmenname (optional), Land, bevorzugte Sprache und Nachrichteninhalt. Die Daten werden ausschließlich zur Beantwortung von Anfragen, zur Erstellung individueller Angebote und, bei bestehendem Vertragsverhältnis, zu dessen Verwaltung verarbeitet. Rechtsgrundlage: Art. 6 Abs. 1 lit. b) DSGVO (Vertragserfüllung oder vorvertragliche Maßnahmen).\n\n<strong>3. Cookies und Browserdaten</strong>\nDiese Website verwendet technische Cookies, die für den Betrieb erforderlich sind. Drittanbieter-Cookies können vorhanden sein (z. B. Microsoft Bookings für Terminbuchungen), die ihren jeweiligen Datenschutzrichtlinien unterliegen. Einzelheiten finden Sie im Cookie-Banner.\n\n<strong>4. Speicherdauer</strong>\nKontaktdaten werden so lange aufbewahrt, wie es zur Bearbeitung der Anfrage oder für die Dauer des Vertragsverhältnisses erforderlich ist, und in jedem Fall nicht länger als 10 Jahre nach Beendigung des Verhältnisses aus gesetzlichen Gründen.\n\n<strong>5. Empfänger</strong>\nDaten werden nicht an Dritte weitergegeben. Sie können an technische Dienstleister (Hosting, E-Mail) weitergegeben werden, die als Auftragsverarbeiter gemäß Art. 28 DSGVO tätig sind.\n\n<strong>6. Internationale Übermittlungen</strong>\nDie Nutzung von Microsoft 365-Diensten kann Datenübermittlungen in die USA beinhalten, die durch den EU-US Data Privacy Framework abgedeckt sind.\n\n<strong>7. Ihre Rechte</strong>\nSie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung oder Widerspruch sowie das Recht auf Datenübertragbarkeit (Art. 15-22 DSGVO). Zur Ausübung Ihrer Rechte: info@gssolution.it. Sie haben außerdem das Recht, eine Beschwerde bei Ihrer nationalen Datenschutzbehörde einzureichen.",
-    'privacy.b2.title': "",
-    'privacy.b2.text': "",
-    'privacy.b3.title': "",
-    'privacy.b3.text': "",
-    'privacy.b4.title': "",
-    'privacy.b4.text': "",
+    'privacy.b1.text': "GsSolution, betrieben von Marco Genovesi, mit Sitz in Italien, USt-IdNr. 01360410326, als Verantwortlicher für die Datenverarbeitung, informiert die Nutzer gemäß Art. 13 der EU-Verordnung 2016/679 (DSGVO) über die Verarbeitung personenbezogener Daten, die über diese Website erhoben werden.\n\n<strong>1. Verantwortlicher</strong>\nGsSolution — Marco Genovesi — USt-IdNr. 01360410326 — info@gssolution.it\n\n<strong>2. Erhobene Daten und Zwecke</strong>\nÜber das Kontaktformular erheben wir: Vorname, Nachname, E-Mail-Adresse, Firmenname (optional), Land, bevorzugte Sprache und Nachrichteninhalt. Die Daten werden ausschließlich zur Beantwortung von Anfragen, zur Erstellung individueller Angebote und, bei bestehendem Vertragsverhältnis, zu dessen Verwaltung verarbeitet. Rechtsgrundlage: Art. 6 Abs. 1 lit. b) DSGVO (Vertragserfüllung oder vorvertragliche Maßnahmen).\n\n<strong>3. Cookies und Browserdaten</strong>\nDiese Website verwendet technische Cookies, die für den Betrieb erforderlich sind. Drittanbieter-Cookies können vorhanden sein (z. B. Microsoft Bookings für Terminbuchungen), die ihren jeweiligen Datenschutzrichtlinien unterliegen. Einzelheiten finden Sie in der Cookie-Richtlinie unten.\n\n<strong>4. Speicherdauer</strong>\nKontaktdaten werden so lange aufbewahrt, wie es zur Bearbeitung der Anfrage oder für die Dauer des Vertragsverhältnisses erforderlich ist, und in jedem Fall nicht länger als 10 Jahre nach Beendigung des Verhältnisses aus gesetzlichen Gründen.\n\n<strong>5. Empfänger</strong>\nDaten werden nicht an Dritte weitergegeben. Sie können an technische Dienstleister (Hosting, E-Mail) weitergegeben werden, die als Auftragsverarbeiter gemäß Art. 28 DSGVO tätig sind.\n\n<strong>6. Internationale Übermittlungen</strong>\nDie Nutzung von Microsoft 365-Diensten kann Datenübermittlungen in die USA beinhalten, die durch den EU-US Data Privacy Framework abgedeckt sind.\n\n<strong>7. Ihre Rechte</strong>\nSie haben das Recht auf Auskunft, Berichtigung, Löschung, Einschränkung der Verarbeitung oder Widerspruch sowie das Recht auf Datenübertragbarkeit (Art. 15-22 DSGVO). Zur Ausübung Ihrer Rechte: info@gssolution.it. Sie haben außerdem das Recht, eine Beschwerde bei Ihrer nationalen Datenschutzbehörde einzureichen.",
+    'privacy.b2.title': "🍪 Cookie-Richtlinie",
+    'privacy.b2.text': "Cookies sind kleine Textdateien, die besuchte Websites an das Endgerät des Nutzers senden, wo sie gespeichert werden, um beim nächsten Besuch an dieselben Websites zurückübermittelt zu werden.\n\n<strong>1. Technische Cookies</strong>\nDiese Website verwendet technische Cookies, die für die ordnungsgemäße Funktion der Seiten, die Verwaltung der ausgewählten Sprache und der Sitzung erforderlich sind. Diese Cookies erfordern keine Zustimmung.\n\n<strong>2. Google Fonts</strong>\nDie Website lädt Schriftarten von den Servern von Google Fonts (Google Ireland Limited), wodurch Ihre IP-Adresse an Google übermittelt werden kann. Weitere Informationen: policies.google.com/privacy.\n\n<strong>3. Microsoft Bookings</strong>\nDer Bereich \"Termin buchen\" bindet ein Microsoft Bookings-iframe ein. Microsoft kann eigene technische und statistische Cookies gemäß seiner Richtlinie setzen: privacy.microsoft.com.\n\n<strong>4. Verwaltung und Deaktivierung</strong>\nSie können Ihre Einstellungen über die Schaltflächen \"Nur notwendige\" und \"Alle akzeptieren\" in diesem Fenster verwalten oder Cookies direkt in den Einstellungen Ihres Browsers deaktivieren.\n\n<strong>5. Verantwortlicher</strong>\nGsSolution — Marco Genovesi — USt-IdNr. 01360410326 — info@gssolution.it",
     'svc.mailbox.intro': "Ein professionelles Exchange-E-Mail-Konto, innerhalb weniger Stunden einsatzbereit und vollständig von uns verwaltet: von der Ersteinrichtung bis zur täglichen Wartung.",
     'svc.mailbox.step1.title': "Bedarfsanalyse",
     'svc.mailbox.step1.text': "Wir ermitteln, wie viele Postfächer Sie benötigen, ob Sie eine eigene Domain oder .onmicrosoft.com wünschen, sowie den Speicher- und Sicherheitsbedarf Ihres Teams.",
@@ -4478,9 +4537,12 @@
     const nome = document.getElementById('formNome');
     const cognome = document.getElementById('formCognome');
     const email = document.getElementById('formEmail');
+    const consent = document.getElementById('formPrivacyConsent');
+    const consentLabel = document.getElementById('consentLabel');
     const errorBox = document.getElementById('formError');
 
     [nome, cognome, email].forEach(f => f.classList.remove('field-error'));
+    consentLabel.classList.remove('field-error');
     errorBox.style.display = 'none';
 
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -4491,11 +4553,12 @@
       email.classList.add('field-error');
       missing.push(t('js.formField.email'));
     }
+    if (!consent.checked) { consentLabel.classList.add('field-error'); missing.push(t('js.formField.consent')); }
 
     if (missing.length > 0) {
       errorBox.textContent = t('js.formMissing', { fields: missing.join(', ') });
       errorBox.style.display = 'block';
-      missing.length && (nome.classList.contains('field-error') ? nome : (cognome.classList.contains('field-error') ? cognome : email)).focus();
+      (nome.classList.contains('field-error') ? nome : (cognome.classList.contains('field-error') ? cognome : (email.classList.contains('field-error') ? email : consent))).focus();
       return;
     }
 
@@ -4510,6 +4573,10 @@
       this.classList.remove('field-error');
       document.getElementById('formError').style.display = 'none';
     });
+  });
+  document.getElementById('formPrivacyConsent').addEventListener('change', function() {
+    document.getElementById('consentLabel').classList.remove('field-error');
+    document.getElementById('formError').style.display = 'none';
   });
 
   /* ── CTA link behaviour ── */
@@ -4553,56 +4620,335 @@
   const initLinguaSel = document.getElementById('formLingua');
   if (initLinguaSel) initLinguaSel.value = currentLang;
 </script>
-<!-- COOKIE BANNER -->
-<div id="cookie-banner" style="display:none;position:fixed;bottom:0;left:0;right:0;z-index:9998;background:#0d2244;color:white;padding:1.2rem 2rem;box-shadow:0 -4px 24px rgba(0,0,0,0.2);">
-  <div style="max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:1.5rem;flex-wrap:wrap;">
-    <div style="flex:1;min-width:260px;">
-      <p style="margin:0;font-size:.88rem;line-height:1.6;color:rgba(255,255,255,0.9);" id="cookie-text">
-        Utilizziamo cookie tecnici necessari al funzionamento del sito e, previo consenso, cookie di terze parti (Microsoft Bookings). Leggi la nostra <a href="#privacy" style="color:#f5a623;text-decoration:underline;" onclick="document.getElementById('cookie-banner').style.display='none'">Privacy Policy</a>.
-      </p>
+<script>
+/* ── PRIVACY / COOKIE CONSENT MODAL ── */
+var PRIVACY_CONSENT_KEY = 'gs_cookie_consent';
+function openPrivacyModal() {
+  document.getElementById('privacyModalOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closePrivacyModal(choice) {
+  try {
+    if (choice) { localStorage.setItem(PRIVACY_CONSENT_KEY, choice); }
+    else if (!localStorage.getItem(PRIVACY_CONSENT_KEY)) { localStorage.setItem(PRIVACY_CONSENT_KEY, 'necessary'); }
+  } catch(e) {}
+  document.getElementById('privacyModalOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  if (choice === 'all' && typeof loadCrisp === 'function') loadCrisp();
+}
+function maybeShowPrivacyModal() {
+  var consent = null;
+  try { consent = localStorage.getItem(PRIVACY_CONSENT_KEY); } catch(e) {}
+  if (!consent) openPrivacyModal();
+}
+document.querySelectorAll('a[href="#privacy"]').forEach(function(a) {
+  a.addEventListener('click', function(e) { e.preventDefault(); openPrivacyModal(); });
+});
+document.addEventListener('keydown', function(e) {
+  if (e.key === 'Escape' && document.getElementById('privacyModalOverlay').classList.contains('open')) {
+    closePrivacyModal();
+  }
+});
+</script>
+
+<!-- ── ASSISTENTE GSBOT — chat di test a scelte, contenuto inventato per provare ── -->
+<style>
+.gsbot-bubble {
+  position: fixed; bottom: 24px; right: 24px; z-index: 9998;
+  width: 60px; height: 60px; border-radius: 50%; border: none;
+  background: var(--orange); color: var(--white);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26px; cursor: pointer; box-shadow: 0 6px 20px rgba(13,34,68,0.25);
+  transition: transform .2s, background .2s;
+}
+.gsbot-bubble:hover { transform: scale(1.08); background: var(--orange2); }
+.gsbot-bubble.gsbot-hidden { display: none; }
+.gsbot-nudge {
+  position: fixed; bottom: 96px; right: 24px; z-index: 9997;
+  background: var(--white); color: var(--navy); border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(13,34,68,0.2); padding: 10px 34px 10px 14px;
+  font-size: .82rem; max-width: 220px; cursor: pointer; animation: gsbotPop .3s ease;
+}
+.gsbot-nudge button {
+  position: absolute; top: 4px; right: 6px; background: none; border: none;
+  font-size: 13px; color: var(--muted); cursor: pointer; line-height: 1; padding: 4px;
+}
+@keyframes gsbotPop { from { transform: translateY(8px) scale(.95); opacity: 0; } to { transform: translateY(0) scale(1); opacity: 1; } }
+.gsbot-panel {
+  position: fixed; bottom: 96px; right: 24px; z-index: 9999;
+  width: 340px; max-width: calc(100vw - 32px); height: 460px; max-height: calc(100vh - 140px);
+  background: var(--white); border-radius: 16px; box-shadow: 0 12px 40px rgba(13,34,68,0.25);
+  display: none; flex-direction: column; overflow: hidden; font-family: 'Inter', sans-serif;
+}
+.gsbot-panel.open { display: flex; }
+.gsbot-header {
+  background: linear-gradient(135deg, var(--navy), var(--navy2)); color: var(--white);
+  padding: 14px 16px; display: flex; align-items: center; justify-content: space-between;
+}
+.gsbot-header strong { font-size: .95rem; display: block; }
+.gsbot-header small { font-size: .72rem; opacity: .85; display: flex; align-items: center; gap: 5px; }
+.gsbot-dot { width: 7px; height: 7px; border-radius: 50%; background: #2ecc71; display: inline-block; }
+.gsbot-dot.off { background: #f1c40f; }
+.gsbot-close { background: none; border: none; color: var(--white); font-size: 18px; cursor: pointer; line-height: 1; }
+.gsbot-messages { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; background: var(--light); }
+.gsbot-msg { max-width: 85%; padding: 9px 12px; border-radius: 12px; font-size: .85rem; line-height: 1.4; }
+.gsbot-msg.bot { background: var(--white); color: var(--navy); align-self: flex-start; border: 1px solid var(--border); }
+.gsbot-msg.bot a { color: var(--orange2); font-weight: 600; }
+.gsbot-msg.user { background: var(--orange); color: var(--white); align-self: flex-end; }
+.gsbot-typing { display: flex; gap: 4px; padding: 12px; align-self: flex-start; }
+.gsbot-typing span { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); opacity: .35; animation: gsbotBlink 1.2s infinite; }
+.gsbot-typing span:nth-child(2) { animation-delay: .2s; }
+.gsbot-typing span:nth-child(3) { animation-delay: .4s; }
+@keyframes gsbotBlink { 0%, 80%, 100% { opacity: .25; transform: translateY(0); } 40% { opacity: 1; transform: translateY(-3px); } }
+.gsbot-quick { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 14px 10px; background: var(--light); }
+.gsbot-quick button {
+  border: 1px solid var(--border); background: var(--white); color: var(--navy);
+  border-radius: 999px; padding: 5px 10px; font-size: .75rem; cursor: pointer;
+}
+.gsbot-quick button:hover { background: #EFF4FF; }
+.gsbot-quick button.gsbot-op { border-color: var(--orange); color: var(--orange2); font-weight: 600; }
+.gsbot-inputbar { display: flex; border-top: 1px solid var(--border); padding: 8px; gap: 6px; background: var(--white); }
+.gsbot-inputbar input { flex: 1; border: 1px solid var(--border); border-radius: 999px; padding: 8px 14px; font-size: .85rem; outline: none; }
+.gsbot-inputbar input:focus { border-color: var(--orange); }
+.gsbot-inputbar button { background: var(--orange); color: var(--white); border: none; border-radius: 999px; width: 36px; height: 36px; cursor: pointer; font-size: 16px; }
+.gsbot-inputbar button:hover { background: var(--orange2); }
+@media (max-width: 480px) {
+  .gsbot-panel, .gsbot-nudge { right: 16px; left: 16px; width: auto; }
+  .gsbot-panel { bottom: 88px; }
+  .gsbot-bubble { right: 16px; bottom: 16px; }
+}
+</style>
+<button class="gsbot-bubble" id="gsbotBubble" aria-label="Apri assistente virtuale GsSolution" onclick="toggleGsBot()">💬</button>
+<div class="gsbot-panel" id="gsbotPanel" role="dialog" aria-modal="false" aria-labelledby="gsbotTitle">
+  <div class="gsbot-header">
+    <div>
+      <strong id="gsbotTitle">Assistente GsSolution</strong>
+      <small><span class="gsbot-dot" id="gsbotDot"></span><span id="gsbotStatus">Online ora</span></small>
     </div>
-    <div style="display:flex;gap:.75rem;flex-wrap:wrap;flex-shrink:0;">
-      <button onclick="cookieChoice('necessary')" style="background:transparent;border:1.5px solid rgba(255,255,255,0.4);color:white;padding:.5rem 1.1rem;border-radius:8px;cursor:pointer;font-size:.84rem;transition:all .2s;">Solo necessari</button>
-      <button onclick="cookieChoice('all')" style="background:#f5a623;border:none;color:white;padding:.5rem 1.3rem;border-radius:8px;cursor:pointer;font-size:.84rem;font-weight:600;transition:all .2s;">Accetta tutti</button>
-    </div>
+    <button type="button" class="gsbot-close" aria-label="Chiudi assistente" onclick="toggleGsBot(false)">✕</button>
   </div>
+  <div class="gsbot-messages" id="gsbotMessages" aria-live="polite"></div>
+  <div class="gsbot-quick" id="gsbotQuick"></div>
+  <form class="gsbot-inputbar" id="gsbotForm">
+    <input type="text" id="gsbotInput" placeholder="Scrivi una domanda..." autocomplete="off">
+    <button type="submit" aria-label="Invia">➤</button>
+  </form>
 </div>
 <script>
-(function(){
-  var COOKIE_KEY = 'gs_cookie_consent';
-  var choice = null;
-  try { choice = localStorage.getItem(COOKIE_KEY); } catch(e){}
-  if (!choice) {
-    var banner = document.getElementById('cookie-banner');
-    if (banner) banner.style.display = 'block';
-    // Update text based on language
-    var lang = (function(){try{return localStorage.getItem('gs_lang')||'it';}catch(e){return 'it';}}());
-    var texts = {
-      it: 'Utilizziamo cookie tecnici necessari al funzionamento del sito e, previo consenso, cookie di terze parti (Microsoft Bookings). Leggi la nostra <a href="#privacy" style="color:#f5a623;text-decoration:underline;" onclick="document.getElementById(\'cookie-banner\').style.display=\'none\'">Privacy Policy</a>.',
-      en: 'We use technical cookies necessary for site operation and, with your consent, third-party cookies (Microsoft Bookings). Read our <a href="#privacy" style="color:#f5a623;text-decoration:underline;" onclick="document.getElementById(\'cookie-banner\').style.display=\'none\'">Privacy Policy</a>.',
-      fr: 'Nous utilisons des cookies techniques nécessaires au fonctionnement du site et, avec votre consentement, des cookies tiers (Microsoft Bookings). Lisez notre <a href="#privacy" style="color:#f5a623;text-decoration:underline;" onclick="document.getElementById(\'cookie-banner\').style.display=\'none\'">Politique de confidentialité</a>.',
-      de: 'Wir verwenden technische Cookies, die für den Betrieb der Website erforderlich sind, und mit Ihrer Zustimmung Drittanbieter-Cookies (Microsoft Bookings). Lesen Sie unsere <a href="#privacy" style="color:#f5a623;text-decoration:underline;" onclick="document.getElementById(\'cookie-banner\').style.display=\'none\'">Datenschutzerklärung</a>.'
-    };
-    var btnTexts = {
-      it: ['Solo necessari', 'Accetta tutti'],
-      en: ['Necessary only', 'Accept all'],
-      fr: ['Nécessaires seulement', 'Tout accepter'],
-      de: ['Nur notwendige', 'Alle akzeptieren']
-    };
-    var el = document.getElementById('cookie-text');
-    if (el && texts[lang]) el.innerHTML = texts[lang];
-    var btns = document.querySelectorAll('#cookie-banner button');
-    if (btns.length >= 2 && btnTexts[lang]) {
-      btns[0].textContent = btnTexts[lang][0];
-      btns[1].textContent = btnTexts[lang][1];
+(function() {
+  /* Contenuto di esempio per il test — da sostituire con testi reali quando confermato */
+  var FAQ = [
+    { label: 'Microsoft 365', kw: ['365','email','posta','onedrive','teams','office','copilot','cloud','licenz','exchange'],
+      answer: "Gestiamo l'intero ambiente Microsoft 365: email Exchange professionale, OneDrive Business, Teams, app Office, Copilot 365, migrazioni senza downtime e backup automatico.", action: '#servizi' },
+    { label: 'Sicurezza', kw: ['sicurezza','mfa','password','gdpr','privacy','virus','antivirus','attacco','compliance'],
+      answer: "Ci occupiamo di sicurezza informatica: autenticazione a più fattori (MFA), Antivirus Enterprise su tutti i dispositivi e supporto per l'adeguamento GDPR della tua infrastruttura IT.", action: '#servizi' },
+    { label: 'VoIP', kw: ['voip','centralino','telefono','telefonia','chiamat'],
+      answer: "Forniamo e configuriamo centralini telefonici in cloud (VoIP) per la tua azienda, senza bisogno di hardware telefonico tradizionale.", action: '#servizi' },
+    { label: 'AI & Automazione', kw: ['ai','intelligenza artificiale','automaz','bot','agente ai','chatbot','workflow'],
+      answer: "Sviluppiamo agenti AI su misura e automatizziamo i processi aziendali (integrazioni, script, collegamenti gestionali) per farti risparmiare tempo.", action: '#servizi' },
+    { label: 'Hardware', kw: ['hardware','pc','computer','portatile','stampante','scanner','dispositiv'],
+      answer: "Forniamo PC, portatili, stampanti, scanner e telefonia: tutto l'hardware necessario per lavorare, configurato e pronto all'uso.", action: '#servizi' },
+    { label: 'Prezzi', kw: ['prezzo','prezzi','costo','costi','quanto cost','pacchett','preventivo','tariff'],
+      answer: "I prezzi dipendono dai servizi che scegli: nel configuratore il totale si aggiorna in tempo reale in base alla combinazione più conveniente per te.", action: '#pacchetti' }
+  ];
+  var OPERATOR_KW = ['operatore','umano','persona reale','parlare con qualcuno','agente umano'];
+  var HISTORY_KEY = 'gsbot_history';
+  var NUDGE_KEY = 'gsbot_nudge_shown';
+
+  var bubble = document.getElementById('gsbotBubble');
+  var panel = document.getElementById('gsbotPanel');
+  var messages = document.getElementById('gsbotMessages');
+  var quick = document.getElementById('gsbotQuick');
+  var form = document.getElementById('gsbotForm');
+  var input = document.getElementById('gsbotInput');
+  var greeted = false;
+
+  function isBusinessHours() {
+    var now = new Date(), day = now.getDay(), hour = now.getHours();
+    return day >= 1 && day <= 5 && hour >= 9 && hour < 18;
+  }
+  function setStatus() {
+    var online = isBusinessHours();
+    document.getElementById('gsbotDot').classList.toggle('off', !online);
+    document.getElementById('gsbotStatus').textContent = online ? 'Online ora' : 'Ti risponderemo a breve';
+  }
+
+  function addMsg(html, who, skipSave) {
+    var div = document.createElement('div');
+    div.className = 'gsbot-msg ' + who;
+    div.innerHTML = html;
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+    if (!skipSave) saveHistory();
+  }
+  function showTyping() {
+    var div = document.createElement('div');
+    div.className = 'gsbot-typing';
+    div.id = 'gsbotTyping';
+    div.innerHTML = '<span></span><span></span><span></span>';
+    messages.appendChild(div);
+    messages.scrollTop = messages.scrollHeight;
+  }
+  function hideTyping() {
+    var t = document.getElementById('gsbotTyping');
+    if (t) t.remove();
+  }
+  function randDelay(min, max) { return min + Math.random() * (max - min); }
+  function botReply(html, action) {
+    showTyping();
+    setTimeout(function() {
+      hideTyping();
+      addMsg(html, 'bot');
+      if (action) {
+        setTimeout(function() {
+          addMsg('<a href="' + action + '" onclick="toggleGsBot(false)">→ Vai alla sezione</a>', 'bot');
+        }, 250);
+      }
+    }, randDelay(500, 1300));
+  }
+  function saveHistory() {
+    try { sessionStorage.setItem(HISTORY_KEY, messages.innerHTML); } catch (e) {}
+  }
+  function restoreHistory() {
+    try {
+      var h = sessionStorage.getItem(HISTORY_KEY);
+      if (h) { messages.innerHTML = h; messages.scrollTop = messages.scrollHeight; return true; }
+    } catch (e) {}
+    return false;
+  }
+
+  function renderQuick() {
+    quick.innerHTML = '';
+    FAQ.forEach(function(item) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.textContent = item.label;
+      b.onclick = function() { handleQuery(item.label, item); };
+      quick.appendChild(b);
+    });
+    var opBtn = document.createElement('button');
+    opBtn.type = 'button';
+    opBtn.className = 'gsbot-op';
+    opBtn.textContent = 'Parla con un operatore';
+    opBtn.onclick = function() { requestOperator(); };
+    quick.appendChild(opBtn);
+  }
+
+  function matchFAQ(text) {
+    var lower = text.toLowerCase();
+    for (var i = 0; i < FAQ.length; i++) {
+      for (var j = 0; j < FAQ[i].kw.length; j++) {
+        if (lower.indexOf(FAQ[i].kw[j]) !== -1) return FAQ[i];
+      }
+    }
+    return null;
+  }
+  function isOperatorRequest(text) {
+    var lower = text.toLowerCase();
+    return OPERATOR_KW.some(function(k) { return lower.indexOf(k) !== -1; });
+  }
+
+  function handleQuery(userText, matched) {
+    addMsg(userText, 'user');
+    if (!matched && isOperatorRequest(userText)) { requestOperator(true); return; }
+    var item = matched || matchFAQ(userText);
+    if (item) {
+      botReply(item.answer, item.action);
+    } else {
+      botReply("Non sono sicuro di aver capito 😊 Scegli un argomento qui sotto oppure parla con un operatore.");
     }
   }
+
+  function requestOperator(skipEcho) {
+    if (!skipEcho) addMsg('Parla con un operatore', 'user');
+    showTyping();
+    setTimeout(function() {
+      hideTyping();
+      var consent = null;
+      try { consent = localStorage.getItem(PRIVACY_CONSENT_KEY); } catch (e) {}
+      if (consent === 'all' && typeof loadCrisp === 'function') {
+        addMsg('Ti metto in contatto con il nostro team, un momento...', 'bot');
+        loadCrisp(true);
+        bubble.classList.add('gsbot-hidden');
+        setTimeout(function() { toggleGsBot(false); }, 600);
+      } else {
+        addMsg("Per attivare la chat dal vivo devo prima chiederti il consenso ai cookie. Accetta il banner e poi clicca di nuovo su 'Parla con un operatore'.", 'bot');
+        if (typeof openPrivacyModal === 'function') openPrivacyModal();
+      }
+    }, randDelay(500, 1000));
+  }
+
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    var text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    handleQuery(text);
+  });
+
+  function showNudge() {
+    try { sessionStorage.setItem(NUDGE_KEY, '1'); } catch (e) {}
+    var bub = document.createElement('div');
+    bub.className = 'gsbot-nudge';
+    bub.id = 'gsbotNudge';
+    bub.innerHTML = 'Ciao! Hai bisogno di una mano? 👋<button type="button" aria-label="Chiudi">✕</button>';
+    document.body.appendChild(bub);
+    bub.querySelector('button').onclick = function(e) { e.stopPropagation(); bub.remove(); };
+    bub.onclick = function() { bub.remove(); toggleGsBot(true); };
+    setTimeout(function() { var n = document.getElementById('gsbotNudge'); if (n) n.remove(); }, 10000);
+  }
+  function tryNudge() {
+    var alreadyShown = false;
+    try { alreadyShown = !!sessionStorage.getItem(NUDGE_KEY); } catch (e) {}
+    if (panel.classList.contains('open') || alreadyShown) return;
+    var modal = document.getElementById('privacyModalOverlay');
+    if (modal && modal.classList.contains('open')) {
+      setTimeout(tryNudge, 2000);
+      return;
+    }
+    showNudge();
+  }
+  setTimeout(tryNudge, 7000);
+
+  window.toggleGsBot = function(force) {
+    var open = typeof force === 'boolean' ? force : !panel.classList.contains('open');
+    panel.classList.toggle('open', open);
+    var nudge = document.getElementById('gsbotNudge');
+    if (open && nudge) nudge.remove();
+    if (open && !greeted) {
+      greeted = true;
+      setStatus();
+      var restored = restoreHistory();
+      if (!restored) {
+        addMsg("Ciao! 👋 Sono l'assistente virtuale di GsSolution. Chiedimi di Microsoft 365, sicurezza, VoIP, AI, hardware o prezzi.", 'bot');
+      }
+      renderQuick();
+    }
+    if (open) input.focus();
+  };
 })();
-function cookieChoice(type) {
-  try { localStorage.setItem('gs_cookie_consent', type); } catch(e){}
-  document.getElementById('cookie-banner').style.display = 'none';
-  // If "all" accepted, load Bookings iframe (it was lazy-loaded anyway)
+</script>
+
+<!-- ── CRISP LIVE CHAT + AI BOT ── -->
+<script>
+var CRISP_WEBSITE_ID = 'INSERISCI-QUI-IL-TUO-WEBSITE-ID'; /* da Crisp: Impostazioni > Setup instructions */
+var crispLoaded = false;
+function loadCrisp() {
+  if (crispLoaded || !CRISP_WEBSITE_ID || CRISP_WEBSITE_ID.indexOf('INSERISCI') === 0) return;
+  crispLoaded = true;
+  window.$crisp = [];
+  window.CRISP_WEBSITE_ID = CRISP_WEBSITE_ID;
+  window.CRISP_RUNTIME_CONFIG = { locale: (typeof currentLang !== 'undefined' ? currentLang : 'it') };
+  (function() {
+    var d = document, s = d.createElement('script');
+    s.src = 'https://client.crisp.chat/l.js';
+    s.async = 1;
+    d.getElementsByTagName('head')[0].appendChild(s);
+  })();
 }
+try {
+  if (localStorage.getItem(PRIVACY_CONSENT_KEY) === 'all') loadCrisp();
+} catch (e) {}
 </script>
 
 </body>
