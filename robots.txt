@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://gssolution.it/sitemap.xml

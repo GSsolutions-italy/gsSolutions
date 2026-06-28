@@ -16,14 +16,14 @@
 <meta property="og:url" content="https://gssolution.it/">
 <meta property="og:title" content="GsSolution – Microsoft Partner per IT, Cloud e Sicurezza Aziendale">
 <meta property="og:description" content="Microsoft 365, sicurezza, comunicazione e automazione AI su misura per la tua azienda. Un agente dedicato che ti segue sempre.">
-<meta property="og:image" content="https://gssolution.it/logo.PNG">
+<meta property="og:image" content="https://gssolution.it/logo.png">
 <meta property="og:locale" content="it_IT">
 
 <!-- Twitter / X Card -->
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="GsSolution – Microsoft Partner per IT, Cloud e Sicurezza Aziendale">
 <meta name="twitter:description" content="Microsoft 365, sicurezza, comunicazione e automazione AI su misura per la tua azienda. Un agente dedicato che ti segue sempre.">
-<meta name="twitter:image" content="https://gssolution.it/logo.PNG">
+<meta name="twitter:image" content="https://gssolution.it/logo.png">
 
 <!-- Favicon -->
 <link rel="icon" type="image/png" href="site-icon.png">
@@ -829,7 +829,7 @@
   .consent input[type="checkbox"] { width: 17px; height: 17px; min-width: 17px; margin-top: 2px; accent-color: var(--orange); cursor: pointer; }
   .consent a { color: var(--orange); }
   .consent.field-error span { color: #DC2626; }
-  input.field-error, textarea.field-error { border-color: #DC2626; background: rgba(220,38,38,0.04); }
+  input.field-error, textarea.field-error, select.field-error { border-color: #DC2626; background: rgba(220,38,38,0.04); }
   .form-error {
     font-size: .8rem; color: #DC2626; font-weight: 600;
     background: rgba(220,38,38,0.08); border-radius: 8px; padding: .6rem .8rem;
@@ -1522,7 +1522,7 @@
       </div>
       <input type="email" id="formEmail" placeholder="Email aziendale *" data-i18n-placeholder="contatti.form.email" required>
       <input type="text" id="formAzienda" placeholder="Azienda" data-i18n-placeholder="contatti.form.azienda">
-      <input type="tel" id="formTelefono" placeholder="Numero di telefono" data-i18n-placeholder="contatti.form.telefono">
+      <input type="tel" id="formTelefono" placeholder="Numero di telefono *" data-i18n-placeholder="contatti.form.telefono" required>
       <div class="frow-2">
         <select id="formPaese">
           <option value="" disabled selected data-i18n="contatti.form.paese.placeholder">Paese</option>
@@ -1538,8 +1538,8 @@
           <option value="de" data-i18n="contatti.form.lingua.de">Deutsch</option>
         </select>
       </div>
-      <select id="formServizio">
-        <option value="" disabled selected data-i18n="contatti.form.servizio.placeholder">Servizio di interesse</option>
+      <select id="formServizio" required>
+        <option value="" disabled selected data-i18n="contatti.form.servizio.placeholder">Servizio di interesse *</option>
         <option data-i18n="contatti.form.opt1">Licenze Microsoft 365</option>
         <option data-i18n="contatti.form.opt2">Migrazione Cloud</option>
         <option data-i18n="contatti.form.opt3">Gestione Dominio & Utenti</option>
@@ -1585,7 +1585,7 @@
 
 <!-- FOOTER -->
 <footer>
-  <img src="logo.PNG" alt="GsSolution" loading="lazy" decoding="async">
+  <img src="logo.png" alt="GsSolution" loading="lazy" decoding="async">
   <p>© 2026 GsSolution · <span data-i18n="footer.tagline">Microsoft Partner | IT, Cloud & Sicurezza</span> · P.IVA 01360410326</p>
   <ul class="footer-links">
     <li><a href="#privacy" data-i18n="footer.privacy">Privacy Policy</a></li>
@@ -1751,6 +1751,8 @@
     'js.formField.cognome': 'cognome',
     'js.formField.email': 'email valida',
     'js.formField.consent': 'consenso privacy',
+    'js.formField.telefono': 'numero di telefono',
+    'js.formField.servizio': 'servizio di interesse',
     'js.formSuccess': '✓ Richiesta inviata!',
     'js.formSending': 'Invio in corso...',
     'js.formSendError': "Si è verificato un errore nell'invio. Riprova oppure scrivici direttamente a info@gssolution.it.",
@@ -1802,12 +1804,12 @@
     'contatti.hours.value': 'Lun–Ven 9:00–18:00 · Emergenze H24',
     'contatti.form.h3': 'Invia una richiesta',
     'contatti.form.sub': 'Risponderemo entro poche ore',
-    'contatti.form.telefono': 'Numero di telefono',
+    'contatti.form.telefono': 'Numero di telefono *',
     'contatti.form.nome': 'Nome *',
     'contatti.form.cognome': 'Cognome *',
     'contatti.form.email': 'Email aziendale *',
     'contatti.form.azienda': 'Azienda',
-    'contatti.form.servizio.placeholder': 'Servizio di interesse',
+    'contatti.form.servizio.placeholder': 'Servizio di interesse *',
     'contatti.form.opt1': 'Licenze Microsoft 365',
     'contatti.form.opt2': 'Migrazione Cloud',
     'contatti.form.opt3': 'Gestione Dominio & Utenti',
@@ -2193,6 +2195,8 @@
     'js.formField.cognome': 'last name',
     'js.formField.email': 'valid email',
     'js.formField.consent': 'privacy consent',
+    'js.formField.telefono': 'phone number',
+    'js.formField.servizio': 'service of interest',
     'js.formSuccess': '✓ Request sent!',
     'js.formSending': 'Sending...',
     'js.formSendError': "There was an error sending your request. Please try again or email us directly at info@gssolution.it.",
@@ -2244,12 +2248,12 @@
     'contatti.hours.value': 'Mon–Fri 9:00 AM–6:00 PM · Emergencies 24/7',
     'contatti.form.h3': 'Send a request',
     'contatti.form.sub': "We'll reply within a few hours",
-    'contatti.form.telefono': 'Phone number',
+    'contatti.form.telefono': 'Phone number *',
     'contatti.form.nome': 'First name *',
     'contatti.form.cognome': 'Last name *',
     'contatti.form.email': 'Business email *',
     'contatti.form.azienda': 'Company',
-    'contatti.form.servizio.placeholder': 'Service of interest',
+    'contatti.form.servizio.placeholder': 'Service of interest *',
     'contatti.form.opt1': 'Microsoft 365 Licenses',
     'contatti.form.opt2': 'Cloud Migration',
     'contatti.form.opt3': 'Domain & User Management',
@@ -2635,6 +2639,8 @@
     'js.formField.cognome': 'nom',
     'js.formField.email': 'email valide',
     'js.formField.consent': 'consentement RGPD',
+    'js.formField.telefono': 'numéro de téléphone',
+    'js.formField.servizio': "service d'intérêt",
     'js.formSuccess': '✓ Demande envoyée !',
     'js.formSending': 'Envoi en cours...',
     'js.formSendError': "Une erreur s'est produite lors de l'envoi. Réessayez ou écrivez-nous directement à info@gssolution.it.",
@@ -2686,12 +2692,12 @@
     'contatti.hours.value': 'Lun–Ven 9h–18h · Urgences 24h/24',
     'contatti.form.h3': 'Envoyer une demande',
     'contatti.form.sub': 'Nous répondrons sous quelques heures',
-    'contatti.form.telefono': 'Numéro de téléphone',
+    'contatti.form.telefono': 'Numéro de téléphone *',
     'contatti.form.nome': 'Prénom *',
     'contatti.form.cognome': 'Nom *',
     'contatti.form.email': 'Email professionnel *',
     'contatti.form.azienda': 'Entreprise',
-    'contatti.form.servizio.placeholder': "Service d'intérêt",
+    'contatti.form.servizio.placeholder': "Service d'intérêt *",
     'contatti.form.opt1': 'Licences Microsoft 365',
     'contatti.form.opt2': 'Migration Cloud',
     'contatti.form.opt3': 'Gestion Domaine & Utilisateurs',
@@ -3077,6 +3083,8 @@
     'js.formField.cognome': 'Nachname',
     'js.formField.email': 'gültige E-Mail',
     'js.formField.consent': 'Datenschutz-Zustimmung',
+    'js.formField.telefono': 'Telefonnummer',
+    'js.formField.servizio': 'interessierender Dienst',
     'js.formSuccess': '✓ Anfrage gesendet!',
     'js.formSending': 'Wird gesendet...',
     'js.formSendError': "Beim Senden ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut oder schreiben Sie uns direkt an info@gssolution.it.",
@@ -3128,12 +3136,12 @@
     'contatti.hours.value': 'Mo–Fr 9:00–18:00 Uhr · Notfälle rund um die Uhr',
     'contatti.form.h3': 'Anfrage senden',
     'contatti.form.sub': 'Wir antworten innerhalb weniger Stunden',
-    'contatti.form.telefono': 'Telefonnummer',
+    'contatti.form.telefono': 'Telefonnummer *',
     'contatti.form.nome': 'Vorname *',
     'contatti.form.cognome': 'Nachname *',
     'contatti.form.email': 'Geschäftliche E-Mail *',
     'contatti.form.azienda': 'Unternehmen',
-    'contatti.form.servizio.placeholder': 'Interessierender Dienst',
+    'contatti.form.servizio.placeholder': 'Interessierender Dienst *',
     'contatti.form.opt1': 'Microsoft 365 Lizenzen',
     'contatti.form.opt2': 'Cloud-Migration',
     'contatti.form.opt3': 'Domain- & Benutzerverwaltung',
@@ -4469,11 +4477,13 @@
     const nome = document.getElementById('formNome');
     const cognome = document.getElementById('formCognome');
     const email = document.getElementById('formEmail');
+    const telefono = document.getElementById('formTelefono');
+    const servizio = document.getElementById('formServizio');
     const consent = document.getElementById('formPrivacyConsent');
     const consentLabel = document.getElementById('consentLabel');
     const errorBox = document.getElementById('formError');
 
-    [nome, cognome, email].forEach(f => f.classList.remove('field-error'));
+    [nome, cognome, email, telefono, servizio].forEach(f => f.classList.remove('field-error'));
     consentLabel.classList.remove('field-error');
     errorBox.style.display = 'none';
 
@@ -4485,12 +4495,14 @@
       email.classList.add('field-error');
       missing.push(t('js.formField.email'));
     }
+    if (!telefono.value.trim()) { telefono.classList.add('field-error'); missing.push(t('js.formField.telefono')); }
+    if (!servizio.value) { servizio.classList.add('field-error'); missing.push(t('js.formField.servizio')); }
     if (!consent.checked) { consentLabel.classList.add('field-error'); missing.push(t('js.formField.consent')); }
 
     if (missing.length > 0) {
       errorBox.textContent = t('js.formMissing', { fields: missing.join(', ') });
       errorBox.style.display = 'block';
-      (nome.classList.contains('field-error') ? nome : (cognome.classList.contains('field-error') ? cognome : (email.classList.contains('field-error') ? email : consent))).focus();
+      (nome.classList.contains('field-error') ? nome : (cognome.classList.contains('field-error') ? cognome : (email.classList.contains('field-error') ? email : (telefono.classList.contains('field-error') ? telefono : (servizio.classList.contains('field-error') ? servizio : consent))))).focus();
       return;
     }
 
@@ -4535,6 +4547,18 @@
       btn.textContent = t('js.formSuccess');
       btn.style.background = '#12883E';
       setTimeout(() => { btn.textContent = originalLabel; btn.style.background = ''; }, 4000);
+
+      // Svuota il form e togli il flag privacy, per evitare invii ripetuti accidentali
+      nome.value = '';
+      cognome.value = '';
+      email.value = '';
+      document.getElementById('formAzienda').value = '';
+      telefono.value = '';
+      paeseSel.selectedIndex = 0;
+      linguaSel.selectedIndex = 0;
+      servizio.selectedIndex = 0;
+      document.getElementById('formMessaggio').value = '';
+      consent.checked = false;
     } catch (err) {
       btn.disabled = false;
       btn.textContent = originalLabel;
@@ -4544,11 +4568,15 @@
   });
 
   // clear individual field error as soon as the person starts fixing it
-  ['formNome', 'formCognome', 'formEmail'].forEach(id => {
+  ['formNome', 'formCognome', 'formEmail', 'formTelefono'].forEach(id => {
     document.getElementById(id).addEventListener('input', function() {
       this.classList.remove('field-error');
       document.getElementById('formError').style.display = 'none';
     });
+  });
+  document.getElementById('formServizio').addEventListener('change', function() {
+    this.classList.remove('field-error');
+    document.getElementById('formError').style.display = 'none';
   });
   document.getElementById('formPrivacyConsent').addEventListener('change', function() {
     document.getElementById('consentLabel').classList.remove('field-error');
