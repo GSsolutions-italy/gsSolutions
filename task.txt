@@ -1,4 +1,9 @@
-Claude, prendi questo script per il banner dei cookie che ti incollo qui sotto:
-<script id="Cookiebot" src="https://consent.cookiebot.com/uc.js" data-cbid="38ab03ad-1e87-45d8-9531-3301e4a7ac08" data-blockingmode="auto" type="text/javascript"></script>
+Claude, voglio usare le direttive di Impeccable per rifinire il design della nostra homepage. Attualmente il sito sembra troppo 'creato dall'AI', con troppe animazioni e uno stile poco aziendale. Per favore, ripuliscilo seguendo queste linee guida:
 
-Inseriscilo correttamente nel tag <head> della mia homepage (index(13).html) e in tutte le altre pagine del sito, posizionandolo come primo elemento per farlo caricare subito a norma di legge.
+Riduci le animazioni: Elimina tutti i movimenti superflui, scorrimenti strani o scritte che compaiono continuamente. Mantieni solo transizioni minime e fluide (es. un leggero cambio di colore quando si passa il mouse sui pulsanti).
+
+Stile Professionale e Rigoroso: Trasforma il layout in un design pulito, moderno, stile SaaS / Agenzia Tech Premium. Usa spaziature ampie (padding generosi), allineamenti geometrici perfetti e contrasti netti.
+
+Tipografia e Colori: Assicurati che i font siano leggibili e che i pulsanti arancioni aziendali risaltino su uno sfondo pulito (bianco/grigio chiaro se è un tema chiaro, o un grigio scuro/notte molto elegante se è un tema scuro), senza gradienti arcobaleno o ombreggiature pesanti.
+
+Basta elementi AI generici: Rendi le sezioni solide, con card ben definite per i servizi e testi ben distanziati

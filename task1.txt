@@ -1,0 +1,3 @@
+"Claude, ho preso la chiave ufficiale di Web3Forms per il dominio. Eccola: 53929a07-92cf-4519-ab6d-f2ecaf736d50.
+Per favore, inseriscila nel file della homepage sostituendo il vecchio segnaposto 'INSERISCI-QUI-LA-TUA-ACCESS-KEY'.
+Una volta inserita, rimuovi anche i numeri di telefono finti di Francia e Germania dalla sezione contatti lasciando solo quelli italiani."
